@@ -1,15 +1,13 @@
 use reqwest::Client;
-use std::env;
+use std::{env, process::ExitCode};
 
-async fn run(endpoint: &str) {
+async fn run(endpoint: &str) -> Result<(), reqwest::Error> {
     let client = Client::builder().build().unwrap();
 
-    let res = client.get(endpoint).send().await;
-
-    res.expect("Invalid error code received");
+    client.get(endpoint).send().await.map(|_| ())
 }
 
-fn main() {
+fn main() -> ExitCode {
     let args: Vec<String> = env::args().collect();
 
     if args.len() > 2 {
@@ -18,12 +16,19 @@ fn main() {
 
     let endpoint = args.last().unwrap();
 
-    tokio::runtime::Builder::new_current_thread()
+    let res = tokio::runtime::Builder::new_current_thread()
         .enable_time()
         .enable_io()
         .build()
         .unwrap()
-        .block_on(run(endpoint))
+        .block_on(run(endpoint));
+
+    if res.is_ok() {
+        ExitCode::from(0)
+    } else {
+        println!("{:?}", res.unwrap_err());
+        ExitCode::from(1)
+    }
 }
 
 #[cfg(test)]
@@ -32,12 +37,15 @@ mod tests {
 
     #[tokio::test]
     async fn can_reach_google() {
-        run("http://google.com").await
+        let res = run("http://google.com").await;
+
+        assert!(res.is_ok())
     }
 
     #[tokio::test]
-    #[should_panic]
     async fn cant_reach_nonsense() {
-        run("http://asdqeqweqweqweqwe.local/qweqweqweqwewqe").await
+        let res = run("http://asdqeqweqweqweqwe.local/qweqweqweqwewqe").await;
+
+        assert!(res.is_err())
     }
 }

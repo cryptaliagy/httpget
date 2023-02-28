@@ -20,7 +20,7 @@ fn main() -> ExitCode {
         .enable_time()
         .enable_io()
         .build()
-        .unwrap()
+        .expect("Could not build the runtime")
         .block_on(run(endpoint));
 
     if res.is_ok() {

@@ -26,7 +26,7 @@ fn main() -> ExitCode {
     if res.is_ok() {
         ExitCode::from(0)
     } else {
-        println!("{:?}", res.unwrap_err());
+        println!("{}", res.unwrap_err());
         ExitCode::from(1)
     }
 }

@@ -4,9 +4,10 @@ on:
   push:
     branches:
       - main
+  pull_request:
 
 jobs:
-  build-and-test:
+  test:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -29,7 +30,7 @@ jobs:
       - name: Lint the code
         run: cargo clippy
 
-      - name: Run the security audit check, ignoring known issue that is not relevant for this project
+      - name: Run the security audit check
         run: cargo audit
 
       - name: Run the tests with the static target for the debug build

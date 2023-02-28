@@ -1,10 +1,8 @@
-use reqwest::Client;
 use std::{env, process::ExitCode};
 
-async fn run(endpoint: &str) -> Result<(), reqwest::Error> {
-    let client = Client::builder().build().unwrap();
-
-    client.get(endpoint).send().await.map(|_| ())
+#[inline]
+fn run(endpoint: &str) -> Result<minreq::Response, minreq::Error> {
+    minreq::get(endpoint).send()
 }
 
 fn main() -> ExitCode {
@@ -16,35 +14,37 @@ fn main() -> ExitCode {
 
     let endpoint = args.last().unwrap();
 
-    let res = tokio::runtime::Builder::new_current_thread()
-        .enable_time()
-        .enable_io()
-        .build()
-        .expect("Could not build the runtime")
-        .block_on(run(endpoint));
+    let res = run(endpoint);
 
-    if res.is_ok() {
-        ExitCode::from(0)
-    } else {
+    if res.is_err() {
         println!("{}", res.unwrap_err());
-        ExitCode::from(1)
+        return ExitCode::from(1);
     }
+
+    let code = res.unwrap().status_code;
+
+    if code > 299 {
+        println!("Received status code {}", code);
+        return ExitCode::from(1);
+    }
+
+    ExitCode::from(0)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    #[tokio::test]
-    async fn can_reach_google() {
-        let res = run("http://google.com").await;
+    #[test]
+    fn can_reach_google() {
+        let res = run("http://google.com");
 
         assert!(res.is_ok())
     }
 
-    #[tokio::test]
-    async fn cant_reach_nonsense() {
-        let res = run("http://asdqeqweqweqweqwe.local/qweqweqweqwewqe").await;
+    #[test]
+    fn cant_reach_nonsense() {
+        let res = run("http://asdqeqweqweqweqwe.local/qweqweqweqwewqe");
 
         assert!(res.is_err())
     }

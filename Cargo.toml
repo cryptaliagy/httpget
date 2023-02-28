@@ -8,3 +8,6 @@ edition = "2021"
 [dependencies]
 reqwest = { version = "0.11.14", default-features = false }
 tokio = { version = "1.25.0", features = ["rt", "io-std"] }
+
+[dev-dependencies]
+tokio = { version = "1.25.0", features = ["rt", "io-std", "test-util", "macros"] }

@@ -27,16 +27,23 @@ jobs:
       - name: Lint the code
         run: cargo clippy
 
-      - name: Run the security audit check, ignoring known issue that is not relevant for this project
+      - name: Run the security audit check
         run: cargo audit
 
       - name: Run the tests with the static target for the debug build
         run: cargo test --target x86_64-unknown-linux-musl
 
-      - name: Build the final binary
-        run: cargo build --release --target x86_64-unknown-linux-musl && strip ./target/x86_64-unknown-linux-musl/release/httpget -o httpget
+      - name: Build the final binaries
+        run: |
+          cargo build --release --target x86_64-unknown-linux-musl && mv ./target/x86_64-unknown-linux-musl/release/httpget httpget
+          cargo build --release --target x86_64-unknown-linux-musl --features tls && mv ./target/x86_64-unknown-linux-musl/release/httpget httpget-tls
 
       - name: Publish the final binary as a release
-        run: gh release create --latest -n "Latest version of httpget, compiled for target x86_64-unknown-linux-musl" -t "HttpGet v0.1.${{ github.run_number }}" 0.1.${{ github.run_number }} httpget
+        run: |
+          gh release create --latest \
+            -n "Latest version of httpget, compiled for target x86_64-unknown-linux-musl" \
+            -t "HttpGet v0.1.${{ github.run_number }}" \
+            0.1.${{ github.run_number }} \
+            httpget*
         env:
           GH_TOKEN: ${{ github.token }}

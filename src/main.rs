@@ -6,9 +6,7 @@ async fn run(endpoint: &str) {
 
     let res = client.get(endpoint).send().await;
 
-    if res.is_err() {
-        panic!("Can't reach route {}", endpoint);
-    }
+    res.expect("Invalid error code received");
 }
 
 fn main() {

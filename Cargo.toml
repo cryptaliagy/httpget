@@ -2,6 +2,13 @@
 name = "httpget"
 version = "0.1.0"
 edition = "2021"
+authors = ["Natalia Maximo <iam@natalia.dev>"]
+description = "A small, simple client to make http get requests and return a 0 status code if they succeed, 1 status code otherwise"
+readme = "README.md"
+repository = "https://github.com/taliamax/httpget"
+license = "MIT"
+keywords = ["http", "client", "minimal"]
+
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -14,3 +21,6 @@ tls = ["minreq/https-rustls"]
 
 [profile.release]
 strip = true
+
+[package.metadata.deb.variants.tls]
+features = ["tls"]

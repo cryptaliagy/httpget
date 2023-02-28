@@ -4,9 +4,10 @@ on:
   push:
     branches:
       - main
+  pull_request:
 
 jobs:
-  build-and-test:
+  test:
     runs-on: ubuntu-latest
     permissions:
       contents: write

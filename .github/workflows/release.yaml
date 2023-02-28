@@ -30,11 +30,10 @@ jobs:
       - name: Run the tests with the static target for the debug build
         run: cargo test --target x86_64-unknown-linux-musl
 
-      - name: Run the tests with the static target for release build
-        run: cargo test --release --target x86_64-unknown-linux-musl
-
       - name: Build the final binary
         run: cargo build --release --target x86_64-unknown-linux-musl && strip ./target/x86_64-unknown-linux-musl/release/httpget -o httpget
 
       - name: Publish the final binary as a release
         run: gh release create --latest -n "Latest version of httpget, compiled for target x86_64-unknown-linux-musl" -t "HttpGet v0.1.${{ github.run_number }}" 0.1.${{ github.run_number }} httpget
+        env:
+          GH_TOKEN: ${{ github.token }}

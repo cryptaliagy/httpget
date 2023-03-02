@@ -3,9 +3,13 @@ name: release
 on:
   workflow_dispatch:
 
+env:
+  VERSION: "0.1.${{ github.run_number }}"
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    environment: release
     permissions:
       contents: write
       packages: write
@@ -38,12 +42,20 @@ jobs:
           cargo build --release --target x86_64-unknown-linux-musl && mv ./target/x86_64-unknown-linux-musl/release/httpget httpget
           cargo build --release --target x86_64-unknown-linux-musl --features tls && mv ./target/x86_64-unknown-linux-musl/release/httpget httpget-tls
 
+      - name: Set the crate version
+        run: cargo set-version ${{ env.VERSION }}
+
+      - name: Publish the crate
+        run: cargo publish --allow-dirty
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
       - name: Publish the final binary as a release
         run: |
           gh release create --latest \
             -n "Latest version of httpget, compiled for target x86_64-unknown-linux-musl" \
-            -t "HttpGet v0.1.${{ github.run_number }}" \
-            0.1.${{ github.run_number }} \
+            -t "HttpGet v${{ env.VERSION}}" \
+            ${{ env.VERSION }} \
             httpget*
         env:
           GH_TOKEN: ${{ github.token }}

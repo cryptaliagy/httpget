@@ -43,7 +43,7 @@ jobs:
           cargo build --release --target x86_64-unknown-linux-musl --features tls && mv ./target/x86_64-unknown-linux-musl/release/httpget httpget-tls
 
       - name: Set the crate version
-        run: cargo set-version ${{ env.VERSION }}
+        run: cargo install cargo-edit --bin cargo-set-version && cargo set-version ${{ env.VERSION }}
 
       - name: Publish the crate
         run: cargo publish --allow-dirty

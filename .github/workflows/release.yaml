@@ -5,6 +5,8 @@ on:
 
 env:
   VERSION: "0.1.${{ github.run_number }}"
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build-and-test:
@@ -23,7 +25,14 @@ jobs:
         with:
           toolchain: stable
           components: rustfmt, clippy
-          target: x86_64-unknown-linux-musl
+          target: x86_64-unknown-linux-
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install required tools
         run: sudo apt update && sudo apt install musl-tools -y
@@ -49,6 +58,22 @@ jobs:
         run: cargo publish --allow-dirty
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+      - name: Push the musl tls container
+        uses: docker/build-push-action@v3
+        with:
+          file: Dockerfile
+          push: true
+          target: runner-tls
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-tls,${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}-tls
+
+      - name: Push the musl runner container
+        uses: docker/build-push-action@v3
+        with:
+          file: Dockerfile
+          push: true
+          target: runner
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest,${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
 
       - name: Publish the final binary as a release
         run: |

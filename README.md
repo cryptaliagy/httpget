@@ -1,7 +1,7 @@
 # HttpGet
 
-[![release](https://github.com/taliamax/httpget/actions/workflows/release.yaml/badge.svg)](https://github.com/taliamax/httpget/actions/workflows/release.yaml)
-[![test](https://github.com/taliamax/httpget/actions/workflows/test.yaml/badge.svg)](https://github.com/taliamax/httpget/actions/workflows/test.yaml)
+[![release](https://github.com/cryptaliagy/httpget/actions/workflows/release.yaml/badge.svg)](https://github.com/cryptaliagy/httpget/actions/workflows/release.yaml)
+[![test](https://github.com/cryptaliagy/httpget/actions/workflows/test.yaml/badge.svg)](https://github.com/cryptaliagy/httpget/actions/workflows/test.yaml)
 
 This is a tiny client that sends an HTTP GET request to the parameter that you specify on the command line. This is statically compiled, so it is useful to toss into distroless or scratch containers that need to have an HTTP client for health check purposes.
 
@@ -30,9 +30,9 @@ Currently, only x86_64 binaries are released. If you are hoping to use this with
 
 ### Docker
 
-Since this binary is primarily meant to be used for Docker health checks, the easiest way to consume this binary is through Docker. The binaries are published in the `ghcr.io/taliamax/httpget` repository in scratch containers, and you can use the version tags or `latest`/`latest-tls`.
+Since this binary is primarily meant to be used for Docker health checks, the easiest way to consume this binary is through Docker. The binaries are published in the `ghcr.io/cryptaliagy/httpget` repository in scratch containers, and you can use the version tags or `latest`/`latest-tls`.
 
-Any released version tag includes an equivalent `tls` tag. See below for an example Dockerfile, or see [this project](https://github.com/taliamax/httpget-example/blob/main/Dockerfile) for an example usecase.
+Any released version tag includes an equivalent `tls` tag. See below for an example Dockerfile, or see [this project](https://github.com/cryptaliagy/httpget-example/blob/main/Dockerfile) for an example usecase.
 
 ```dockerfile
 FROM golang:latest as build
@@ -42,7 +42,7 @@ FROM golang:latest as build
 
 # In the end we get a binary at /app/bin/example with our web service
 
-FROM ghcr.io/taliamax/httpget:latest as httpget
+FROM ghcr.io/cryptaliagy/httpget:latest as httpget
 
 FROM scratch as runner
 
@@ -57,7 +57,7 @@ CMD ["/example"]
 Another option is to put the `httpget` image _before_ the build stage and copy it into the output directory for the build stage, so your final image is only a single layer:
 
 ```dockerfile
-FROM ghcr.io/taliamax/httpget:latest as httpget
+FROM ghcr.io/cryptaliagy/httpget:latest as httpget
 
 FROM golang:latest as build
 
@@ -79,7 +79,7 @@ CMD ["/bin/example"]
 
 ### Github Releases (Direct Download)
 
-The regular binary and the TLS binary are available through Github Releases, and can be downloaded [here](https://github.com/taliamax/httpget/releases). The `httpget` binary can _only_ use `http://` protocol URLs, and the `httpget-tls` can use either `http://` or `https://`.
+The regular binary and the TLS binary are available through Github Releases, and can be downloaded [here](https://github.com/cryptaliagy/httpget/releases). The `httpget` binary can _only_ use `http://` protocol URLs, and the `httpget-tls` can use either `http://` or `https://`.
 
 ### Install with Cargo
 

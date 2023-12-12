@@ -21,6 +21,10 @@ tls = ["minreq/https-rustls"]
 
 [profile.release]
 strip = true
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
 
 [package.metadata.deb.variants.tls]
 features = ["tls"]

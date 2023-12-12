@@ -1,9 +1,11 @@
-# Rust 1.70.0 is latest as of Jun 27, 2023
-FROM rust:1.70.0 as build
+# Rust 1.74.1 is latest as of Dec 12, 2023
+FROM rust:1.74.1 as build
 
-# Install the targets
 RUN rustup target add $(arch)-unknown-linux-musl $(arch)-unknown-linux-gnu && \
     apt-get update && apt-get install -y musl-tools
+
+RUN curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash && \
+    cargo binstall cross
 
 WORKDIR /app
 
@@ -11,7 +13,7 @@ COPY Cargo.toml Cargo.lock ./
 
 # Create a fake binary target to be used for dependency caching locally, then clean it
 RUN mkdir src && echo "fn main() {}" > src/main.rs \
-    && cargo build \
+    && cross build \
     && rm src/main.rs
 
 COPY src ./src
@@ -21,10 +23,10 @@ RUN touch -am src/main.rs \
     && mkdir ./bin
 
 # Use a statically linked target for the prod
-RUN cargo build --release --target $(arch)-unknown-linux-musl \
+RUN cross build --release --target $(arch)-unknown-linux-musl \
     && mv ./target/$(arch)-unknown-linux-musl/release/httpget ./bin/httpget
 
-RUN cargo build --release --features tls --target $(arch)-unknown-linux-musl \
+RUN cross build --release --features tls --target $(arch)-unknown-linux-musl \
     && mv ./target/$(arch)-unknown-linux-musl/release/httpget ./bin/httpget-tls
 
 

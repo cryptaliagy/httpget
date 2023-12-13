@@ -33,10 +33,10 @@ jobs:
 
       - name: Build project in x86_64-unknown-linux-musl and aarch64-unknown-linux-musl
         run: |
-          cross build --target x86_64-unknown-linux-musl && mv ./target/x86_64-unknown-linux-musl/release/httpget ./bin/httpget.x86_64
-          cross build --target x86_64-unknown-linux-musl --features tls && mv ./target/x86_64-unknown-linux-musl/release/httpget ./bin/httpget-tls.x86_64
-          cross build --target aarch64-unknown-linux-musl && mv ./target/aarch64-unknown-linux-musl/release/httpget ./bin/httpget.amd64
-          cross build --target aarch64-unknown-linux-musl --features tls && mv ./target/aarch64-unknown-linux-musl/release/httpget ./bin/httpget-tls.amd64
+          cross build --target x86_64-unknown-linux-musl && mv ./target/x86_64-unknown-linux-musl/debug/httpget ./bin/httpget.x86_64
+          cross build --target x86_64-unknown-linux-musl --features tls && mv ./target/x86_64-unknown-linux-musl/debug/httpget ./bin/httpget-tls.x86_64
+          cross build --target aarch64-unknown-linux-musl --release && mv ./target/aarch64-unknown-linux-musl/debug/httpget ./bin/httpget.amd64
+          cross build --target aarch64-unknown-linux-musl --features tls && mv ./target/aarch64-unknown-linux-musl/debug/httpget ./bin/httpget-tls.amd64
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2

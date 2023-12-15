@@ -38,9 +38,9 @@ jobs:
           cargo clean
           cross build --target x86_64-unknown-linux-musl --features tls && mv ./target/x86_64-unknown-linux-musl/debug/httpget ./bin/httpget-tls.x86_64
           cargo clean
-          cross build --target aarch64-unknown-linux-musl && mv ./target/aarch64-unknown-linux-musl/debug/httpget ./bin/httpget.amd64
+          cross build --target aarch64-unknown-linux-musl && mv ./target/aarch64-unknown-linux-musl/debug/httpget ./bin/httpget.aarch64
           cargo clean
-          cross build --target aarch64-unknown-linux-musl --features tls && mv ./target/aarch64-unknown-linux-musl/debug/httpget ./bin/httpget-tls.amd64
+          cross build --target aarch64-unknown-linux-musl --features tls && mv ./target/aarch64-unknown-linux-musl/debug/httpget ./bin/httpget-tls.aarch64
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2

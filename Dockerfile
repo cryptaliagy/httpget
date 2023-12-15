@@ -4,7 +4,8 @@ RUN mkdir ./bins
 
 COPY httpget.* ./bins/
 
-RUN mv "./bins/httpget.$(arch)" ./bins/httpget && \
+RUN ls ./bins && \
+    mv "./bins/httpget.$(arch)" ./bins/httpget && \
     mv "./bins/httpget-tls.$(arch)" ./bins/httpget-tls
 
 FROM scratch as runner

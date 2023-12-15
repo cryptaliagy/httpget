@@ -4,6 +4,8 @@ RUN mkdir ./bins
 
 COPY httpget.* ./bins/
 
+COPY httpget-tls.* ./bins/
+
 RUN ls ./bins && \
     mv "./bins/httpget.$(arch)" ./bins/httpget && \
     mv "./bins/httpget-tls.$(arch)" ./bins/httpget-tls

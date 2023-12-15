@@ -15,12 +15,12 @@ It's also becoming a bigger trend to use either [distroless](https://github.com/
 
 Let's compare the binary size against other popular ones, specifically against `wget` and `curl`, measured from the binary & its dependencies in the `alpine` container
 
-| Binary                   | Size   |
-| ------------------------ | ------ |
-| `curl`                   | 6.1mb  |
-| `wget`                   | 1.4mb  |
-| `httpget`, no TLS        | 610kb  |
-| `httpget`, with `rustls` | 1.62mb |
+| Binary                   | Size  |
+| ------------------------ | ----- |
+| `curl`                   | 6.1mb |
+| `wget`                   | 1.4mb |
+| `httpget`, no TLS        | 531kb |
+| `httpget`, with `rustls` | 1.2mb |
 
 So, all in all, it's quite minimal.
 

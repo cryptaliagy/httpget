@@ -6,12 +6,59 @@ on:
       - main
   pull_request:
 
+env:
+  VERSION: "0.1.${{ github.run_number }}"
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
 jobs:
+  build-container:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install rust tool chain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+          target: x86_64-unknown-linux-musl
+
+      - name: Install cargo-binstall
+        run: curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+
+      - name: Install cross
+        run: cargo binstall -y cross
+
+      - name: Build project in x86_64-unknown-linux-musl and aarch64-unknown-linux-musl
+        run: |
+          mkdir -p ./bin
+          cross build --target x86_64-unknown-linux-musl && mv ./target/x86_64-unknown-linux-musl/debug/httpget ./bin/httpget.x86_64
+          cargo clean
+          cross build --target x86_64-unknown-linux-musl --features tls && mv ./target/x86_64-unknown-linux-musl/debug/httpget ./bin/httpget-tls.x86_64
+          cargo clean
+          cross build --target aarch64-unknown-linux-musl && mv ./target/aarch64-unknown-linux-musl/debug/httpget ./bin/httpget.aarch64
+          cargo clean
+          cross build --target aarch64-unknown-linux-musl --features tls && mv ./target/aarch64-unknown-linux-musl/debug/httpget ./bin/httpget-tls.aarch64
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build the container
+        uses: docker/build-push-action@v4
+        with:
+          context: ./bin
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: false
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest,${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+
   test:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      packages: write
 
     steps:
       - name: Checkout repository
@@ -24,8 +71,21 @@ jobs:
           components: rustfmt, clippy
           target: x86_64-unknown-linux-musl
 
-      - name: Install required tools
-        run: sudo apt update && sudo apt install musl-tools -y
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-test-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install cargo-binstall
+        run: curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+
+      - name: Install cross
+        run: cargo binstall -y cross
 
       - name: Lint the code
         run: cargo clippy
@@ -34,4 +94,10 @@ jobs:
         run: cargo audit
 
       - name: Run the tests with the static target for the debug build
-        run: cargo test --target x86_64-unknown-linux-musl
+        run: cross test --target x86_64-unknown-linux-musl
+
+      - name: Run cargo clean
+        run: cargo clean
+
+      - name: Run the test for arm64 target
+        run: cross test --target aarch64-unknown-linux-musl

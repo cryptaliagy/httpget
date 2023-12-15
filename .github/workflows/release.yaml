@@ -27,6 +27,12 @@ jobs:
           components: rustfmt, clippy
           target: x86_64-unknown-linux-musl
 
+      - name: Install cargo-binstall
+        run: curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+
+      - name: Install cross
+        run: cargo binstall -y cross
+
       - name: Log in to the Container registry
         uses: docker/login-action@v2
         with:
@@ -44,12 +50,14 @@ jobs:
         run: cargo audit
 
       - name: Run the tests with the static target for the debug build
-        run: cargo test --target x86_64-unknown-linux-musl
+        run: cross test --target x86_64-unknown-linux-musl && cargo clean
 
       - name: Build the final binaries
         run: |
-          cargo build --release --target x86_64-unknown-linux-musl && mv ./target/x86_64-unknown-linux-musl/release/httpget httpget
-          cargo build --release --target x86_64-unknown-linux-musl --features tls && mv ./target/x86_64-unknown-linux-musl/release/httpget httpget-tls
+          cross build --release --target x86_64-unknown-linux-musl && mv ./target/x86_64-unknown-linux-musl/release/httpget httpget && cargo clean
+          cross build --release --target x86_64-unknown-linux-musl --features tls && mv ./target/x86_64-unknown-linux-musl/release/httpget httpget-tls && cargo clean
+          cross build --release --target aarch64-unknown-linux-musl && mv ./target/aarch64-unknown-linux-musl/release/httpget httpget.aarch64 && cargo clean
+          cross build --release --target aarch64-unknown-linux-musl --features tls && mv ./target/aarch64-unknown-linux-musl/release/httpget httpget-tls.aarch64 && cargo clean
 
       - name: Set the crate version
         run: cargo install cargo-edit --bin cargo-set-version && cargo set-version ${{ env.VERSION }}
@@ -63,6 +71,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           file: Dockerfile
+          platforms: linux/amd64,linux/arm64
           push: true
           target: runner-tls
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-tls,${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}-tls
@@ -71,6 +80,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           file: Dockerfile
+          platforms: linux/amd64,linux/arm64
           push: true
           target: runner
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest,${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
@@ -78,7 +88,7 @@ jobs:
       - name: Publish the final binary as a release
         run: |
           gh release create --latest \
-            -n "Latest version of httpget, compiled for target x86_64-unknown-linux-musl" \
+            -n "Latest version of httpget, compiled for target x86_64-unknown-linux-musl and aarch64-unknown-linux-musl" \
             -t "HttpGet v${{ env.VERSION}}" \
             ${{ env.VERSION }} \
             httpget*

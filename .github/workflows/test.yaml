@@ -52,7 +52,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: ./bin
-          file: ./Dockerfile.release
+          file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
           push: false
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest,${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
@@ -95,6 +95,9 @@ jobs:
 
       - name: Run the tests with the static target for the debug build
         run: cross test --target x86_64-unknown-linux-musl
+
+      - name: Run cargo clean
+        run: cargo clean
 
       - name: Run the test for arm64 target
         run: cross test --target aarch64-unknown-linux-musl

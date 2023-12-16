@@ -76,17 +76,17 @@ jobs:
       - name: List the files
         run: ls -la
 
-      # - name: Publish the crate
-      #   run: cargo publish --allow-dirty
-      #   env:
-      #     CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      - name: Publish the crate
+        run: cargo publish --allow-dirty
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
       - name: Push the musl tls container
         uses: docker/build-push-action@v4
         with:
           file: Dockerfile
           platforms: linux/amd64,linux/arm64
-          push: false
+          push: true
           target: runner-tls
           context: ./bin
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-tls,${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}-tls
@@ -96,17 +96,17 @@ jobs:
         with:
           file: Dockerfile
           platforms: linux/amd64,linux/arm64
-          push: false
+          push: true
           target: runner
           context: ./bin
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest,${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
 
-      # - name: Publish the final binary as a release
-      #   run: |
-      #     gh release create --latest \
-      #       -n "Latest version of httpget, compiled for target x86_64-unknown-linux-musl and aarch64-unknown-linux-musl" \
-      #       -t "HttpGet v${{ env.VERSION}}" \
-      #       ${{ env.VERSION }} \
-      #       ./bin/httpget*
-      #   env:
-      #     GH_TOKEN: ${{ github.token }}
+      - name: Publish the final binary as a release
+        run: |
+          gh release create --latest \
+            -n "Latest version of httpget, compiled for target x86_64-unknown-linux-musl and aarch64-unknown-linux-musl" \
+            -t "HttpGet v${{ env.VERSION}}" \
+            ${{ env.VERSION }} \
+            ./bin/httpget*
+        env:
+          GH_TOKEN: ${{ github.token }}

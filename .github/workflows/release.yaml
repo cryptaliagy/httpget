@@ -62,12 +62,19 @@ jobs:
 
       - name: Build the final binaries
         run: |
-          cross build --release --target x86_64-unknown-linux-musl && mv ./target/x86_64-unknown-linux-musl/release/httpget httpget.x86_64 && cargo clean
-          cross build --release --target x86_64-unknown-linux-musl --features tls && mv ./target/x86_64-unknown-linux-musl/release/httpget httpget-tls.x86_64 && cargo clean
-          cross build --release --target aarch64-unknown-linux-musl && mv ./target/aarch64-unknown-linux-musl/release/httpget httpget.aarch64 && cargo clean
-          cross build --release --target aarch64-unknown-linux-musl --features tls && mv ./target/aarch64-unknown-linux-musl/release/httpget httpget-tls.aarch64 && cargo clean
-          cp ./httpget.x86_64 ./httpget
-          cp ./httpget-tls.x86_64 ./httpget-tls
+          mkdir -p ./bin
+          cross build --target x86_64-unknown-linux-musl --release && mv ./target/x86_64-unknown-linux-musl/release/httpget ./bin/httpget.x86_64
+          cargo clean
+          cross build --target x86_64-unknown-linux-musl --features tls --release && mv ./target/x86_64-unknown-linux-musl/release/httpget ./bin/httpget-tls.x86_64
+          cargo clean
+          cross build --target aarch64-unknown-linux-musl --release && mv ./target/aarch64-unknown-linux-musl/release/httpget ./bin/httpget.aarch64
+          cargo clean
+          cross build --target aarch64-unknown-linux-musl --features tls --release && mv ./target/aarch64-unknown-linux-musl/release/httpget ./bin/httpget-tls.aarch64
+          cp ./bin/httpget.x86_64 ./bin/httpget
+          cp ./bin/httpget-tls.x86_64 ./bin/httpget-tls
+
+      - name: List the files
+        run: ls -la
 
       - name: Publish the crate
         run: cargo publish --allow-dirty
@@ -75,21 +82,23 @@ jobs:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
       - name: Push the musl tls container
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           file: Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           target: runner-tls
+          context: ./bin
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-tls,${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}-tls
 
       - name: Push the musl runner container
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           file: Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           target: runner
+          context: ./bin
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest,${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
 
       - name: Publish the final binary as a release
@@ -98,6 +107,6 @@ jobs:
             -n "Latest version of httpget, compiled for target x86_64-unknown-linux-musl and aarch64-unknown-linux-musl" \
             -t "HttpGet v${{ env.VERSION}}" \
             ${{ env.VERSION }} \
-            httpget*
+            ./bin/httpget*
         env:
           GH_TOKEN: ${{ github.token }}

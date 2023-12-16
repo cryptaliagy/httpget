@@ -62,10 +62,12 @@ jobs:
 
       - name: Build the final binaries
         run: |
-          cross build --release --target x86_64-unknown-linux-musl && mv ./target/x86_64-unknown-linux-musl/release/httpget httpget && cargo clean
-          cross build --release --target x86_64-unknown-linux-musl --features tls && mv ./target/x86_64-unknown-linux-musl/release/httpget httpget-tls && cargo clean
+          cross build --release --target x86_64-unknown-linux-musl && mv ./target/x86_64-unknown-linux-musl/release/httpget httpget.x86_64 && cargo clean
+          cross build --release --target x86_64-unknown-linux-musl --features tls && mv ./target/x86_64-unknown-linux-musl/release/httpget httpget-tls.x86_64 && cargo clean
           cross build --release --target aarch64-unknown-linux-musl && mv ./target/aarch64-unknown-linux-musl/release/httpget httpget.aarch64 && cargo clean
           cross build --release --target aarch64-unknown-linux-musl --features tls && mv ./target/aarch64-unknown-linux-musl/release/httpget httpget-tls.aarch64 && cargo clean
+          cp ./httpget.x86_64 ./httpget
+          cp ./httpget-tls.x86_64 ./httpget-tls
 
       - name: Publish the crate
         run: cargo publish --allow-dirty

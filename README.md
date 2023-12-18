@@ -26,7 +26,7 @@ So, all in all, it's quite minimal.
 
 ## Installing HttpGet
 
-Currently, only x86_64 binaries are released. If you are hoping to use this with ARM-based images, you will need to build them yourself.
+Binaries are provided for both x86_84 and arm64 architectures, both as Docker images and as direct download from the Github Releases page.
 
 ### Docker
 

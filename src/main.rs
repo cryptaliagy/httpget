@@ -12,9 +12,13 @@ fn main() -> ExitCode {
         panic!("Too many arguments!")
     }
 
-    let endpoint = args.last().unwrap();
+    let endpoint = if args.len() == 2 {
+        args.last().unwrap().to_owned()
+    } else {
+        env::var("HTTPGET_ENDPOINT").unwrap()
+    };
 
-    let res = run(endpoint);
+    let res = run(&endpoint);
 
     if res.is_err() {
         println!("{}", res.unwrap_err());

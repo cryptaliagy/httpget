@@ -19,8 +19,8 @@ Let's compare the binary size against other popular ones, specifically against `
 | ------------------------ | ----- |
 | `curl`                   | 6.1mb |
 | `wget`                   | 1.4mb |
-| `httpget`, no TLS        | 531kb |
-| `httpget`, with `rustls` | 1.2mb |
+| `httpget`, no TLS        | 519kb |
+| `httpget`, with `rustls` | 1.3mb |
 
 So, all in all, it's quite minimal.
 
@@ -86,3 +86,7 @@ The regular binary and the TLS binary are available through Github Releases, and
 This project is published on [crates.io](https://crates.io/crates/httpget), and can be installed using `cargo` with the command `cargo install httpget`. This will **not** produce a statically-linked binary: for that, you must ensure that you've installed the correct `*-unknown-linux-musl` target.
 
 You can also clone this repository and run `cargo install --path .` to install through Cargo
+
+## Specifying Endpoint
+
+There are two supported ways to pass an endpoint to `httpget`. The first is to pass it explicitly (e.g. `httpget http://example.com/`). The second is to specify the endpoint in the `HTTPGET_ENDPOINT` environment variable, and call `httpget` with no arguments.

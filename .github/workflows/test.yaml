@@ -59,6 +59,8 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    permissions:
+      checks: write
 
     steps:
       - name: Checkout repository
@@ -90,8 +92,9 @@ jobs:
       - name: Lint the code
         run: cargo clippy
 
-      - name: Run the security audit check
-        run: cargo audit
+      - uses: rustsec/audit-check@v1.4.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run the tests with the static target for the debug build
         run: cross test --target x86_64-unknown-linux-musl

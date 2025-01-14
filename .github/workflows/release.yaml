@@ -15,6 +15,7 @@ jobs:
     permissions:
       contents: write
       packages: write
+      checks: write
 
     steps:
       - name: Checkout repository
@@ -51,8 +52,9 @@ jobs:
       - name: Lint the code
         run: cargo clippy
 
-      - name: Run the security audit check
-        run: cargo audit
+      - uses: rustsec/audit-check@v1.4.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set the crate version
         run: cargo install cargo-edit --bin cargo-set-version && cargo set-version ${{ env.VERSION }}

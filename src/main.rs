@@ -15,7 +15,7 @@ fn main() -> ExitCode {
     let endpoint = if args.len() == 2 {
         args.last().unwrap().to_owned()
     } else {
-        env::var("HTTPGET_ENDPOINT").unwrap()
+        env::var("HTTPGET_ENDPOINT").expect("Environment variable HTTPGET_ENDPOINT not set")
     };
 
     let res = run(&endpoint);
